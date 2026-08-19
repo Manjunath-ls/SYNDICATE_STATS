@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SYNDICATE // MANJU_-FF & OLA_AMIT</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800;900&family=Space+Grotesk:wght@400;500;700&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Three.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- Vanilla Tilt CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"Space Grotesk"', 'monospace'],
+            display: ['"Syne"', 'sans-serif'],
+          },
+          colors: {
+            ff: {
+              gold: '#FDB813',
+              red: '#FF2E55',
+              crimson: '#D91B42',
+              purple: '#A855F7',
+              cyan: '#00F0FF',
+              dark: '#050508',
+              card: '#0D0D14',
+              border: '#1B1B26'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Guaranteed Cursor & Interaction safety */
+    * { cursor: default; box-sizing: border-box; }
+    button, a, .interactive, [onclick] { cursor: pointer !important; }
+    
+    /* Interactive Custom Cursor */
+    .cursor-dot {
+      pointer-events: none !important;
+      position: fixed;
+      top: 0; left: 0;
+      width: 8px; height: 8px;
+      background: #FF2E55;
+      border-radius: 50%;
+      z-index: 99999;
+      transform: translate3d(-100px, -100px, 0);
+      box-shadow: 0 0 12px #FF2E55;
+    }
+    .cursor-outline {
+      pointer-events: none !important;
+      position: fixed;
+      top: 0; left: 0;
+      width: 38px; height: 38px;
+      border: 1.5px solid rgba(255, 46, 85, 0.7);
+      border-radius: 50%;
+      z-index: 99998;
+      transform: translate3d(-100px, -100px, 0);
+      transition: width 0.2s ease, height 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .click-ripple {
+      position: fixed;
+      border-radius: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      border: 2px solid #FF2E55;
+      animation: rippleAnim 0.5s ease-out forwards;
+      pointer-events: none !important;
+      z-index: 99997;
+    }
+    @keyframes rippleAnim {
+      to {
+        transform: translate(-50%, -50%) scale(4);
+        opacity: 0;
+      }
+    }
+
+    /* Tab Page System (Pure CSS) */
+    .tab-section {
+      display: none;
+    }
+    .tab-section.active-tab {
+      display: block !important;
+    }
+
+    /* Active Nav Button */
+    .btn-nav-active {
+      background-color: #FF2E55 !important;
+      color: #000000 !important;
+      font-weight: 800 !important;
+      box-shadow: 0 0 20px rgba(255, 46, 85, 0.6) !important;
+    }
+
+    .holo-card {
+      position: relative;
+      background: rgba(13, 13, 20, 0.88);
+      backdrop-filter: blur(24px);
+    }
+    .holo-card::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      background: linear-gradient(135deg, rgba(255, 46, 85, 0.4), rgba(253, 184, 19, 0.2), rgba(168, 85, 247, 0.4));
+      border-radius: inherit;
+      z-index: -1;
+      opacity: 0.4;
+      transition: opacity 0.3s ease;
+    }
+    .holo-card:hover::before {
+      opacity: 1;
+    }
+
+    .scan-bg {
+      background-size: 48px 48px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    }
+  </style>
+
+  <!-- ROCK-SOLID TAB SWITCHER ENGINE -->
+  <script>
+    function openTab(tabId) {
+      // 1. Hide all pages
+      var sections = document.querySelectorAll('.tab-section');
+      for (var i = 0; i < sections.length; i++) {
+        sections[i].classList.remove('active-tab');
+      }
+
+      // 2. Display requested page
+      var target = document.getElementById(tabId);
+      if (target) {
+        target.classList.add('active-tab');
+      }
+
+      // 3. Highlight navigation buttons
+      var tabKeys = ['tab-duo', 'tab-manju', 'tab-amit', 'tab-armory'];
+      for (var j = 0; j < tabKeys.length; j++) {
+        var key = tabKeys[j];
+        var dBtn = document.getElementById('btn-' + key);
+        var mBtn = document.getElementById('m-btn-' + key);
+
+        if (dBtn) {
+          if (key === tabId) {
+            dBtn.classList.add('btn-nav-active');
+            dBtn.classList.remove('text-zinc-400');
+          } else {
+            dBtn.classList.remove('btn-nav-active');
+            dBtn.classList.add('text-zinc-400');
+          }
+        }
+
+        if (mBtn) {
+          if (key === tabId) {
+            mBtn.style.color = '#FF2E55';
+            mBtn.style.fontWeight = 'bold';
+          } else {
+            mBtn.style.color = '#71717A';
+            mBtn.style.fontWeight = 'normal';
+          }
+        }
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function copyUID(uid, name) {
+      navigator.clipboard.writeText(uid);
+      var toast = document.getElementById("toast");
+      var toastText = document.getElementById("toast-text");
+      if (toast && toastText) {
+        toastText.innerText = name + " UID (" + uid + ") COPIED!";
+        toast.style.transform = "translate(-50%, 0)";
+        toast.style.opacity = "1";
+        setTimeout(function() {
+          toast.style.transform = "translate(-50%, 6rem)";
+          toast.style.opacity = "0";
+        }, 2500);
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-ff-dark text-slate-100 min-h-screen overflow-x-hidden selection:bg-ff-red selection:text-white font-sans antialiased scan-bg">
+
+  <!-- Custom Cursor Nodes -->
+  <div class="cursor-dot" id="cursor-dot"></div>
+  <div class="cursor-outline" id="cursor-outline"></div>
+
+  <!-- Background 3D Canvas (pointer-events-none ensures buttons are NEVER blocked) -->
+  <div class="fixed inset-0 pointer-events-none z-0">
+    <canvas id="three-canvas" class="w-full h-full opacity-80 pointer-events-none"></canvas>
+  </div>
+
+  <!-- Ambient Glow -->
+  <div class="fixed inset-0 pointer-events-none z-0">
+    <div class="absolute top-0 left-1/4 w-[600px] h-[600px] bg-ff-red/10 rounded-full blur-[160px]"></div>
+    <div class="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-ff-purple/10 rounded-full blur-[180px]"></div>
+  </div>
+
+  <!-- Sticky Top Header -->
+  <header class="relative z-50 flex items-center justify-between px-6 md:px-14 py-5 border-b border-ff-border/80 backdrop-blur-xl bg-ff-dark/85 sticky top-0">
+    <div class="flex items-center gap-4">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-ff-red to-ff-gold flex items-center justify-center font-black text-black text-lg font-mono tracking-tighter shadow-lg shadow-ff-red/25">FF</div>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-base font-display font-black tracking-wider text-white">TG_ASSASIAN</span>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-ff-gold/20 text-ff-gold font-bold">DUO SYNDICATE</span>
+        </div>
+        <span class="text-[10px] text-zinc-500 font-mono tracking-widest uppercase">750 DAYS CO-OP BOND</span>
+      </div>
+    </div>
+
+    <!-- Desktop Tabs -->
+    <nav class="hidden md:flex items-center p-1 rounded-full border border-ff-border bg-zinc-950/90 backdrop-blur-md">
+      <button type="button" onclick="openTab('tab-duo')" id="btn-tab-duo" class="interactive px-5 py-2 rounded-full text-xs font-mono tracking-widest uppercase transition btn-nav-active">
+        01. Dynamic Duo
+      </button>
+      <button type="button" onclick="openTab('tab-manju')" id="btn-tab-manju" class="interactive px-5 py-2 rounded-full text-xs font-mono tracking-widest uppercase text-zinc-400 hover:text-white transition">
+        02. MANJU_-FF
+      </button>
+      <button type="button" onclick="openTab('tab-amit')" id="btn-tab-amit" class="interactive px-5 py-2 rounded-full text-xs font-mono tracking-widest uppercase text-zinc-400 hover:text-white transition">
+        03. OLA_AMIT
+      </button>
+      <button type="button" onclick="openTab('tab-armory')" id="btn-tab-armory" class="interactive px-5 py-2 rounded-full text-xs font-mono tracking-widest uppercase text-zinc-400 hover:text-white transition">
+        04. Armory Vault
+      </button>
+    </nav>
+
+    <!-- Quick UID Actions -->
+    <div class="flex items-center gap-2">
+      <button type="button" onclick="copyUID('2272023598', 'MANJU_-FF')" class="interactive relative group overflow-hidden px-4 py-2 rounded-full border border-ff-border bg-white/[0.04] text-[11px] font-mono uppercase tracking-widest hover:border-ff-red transition">
+        <span class="relative z-10 flex items-center gap-1.5 text-zinc-300">
+          <i data-lucide="copy" class="w-3 h-3 text-ff-red"></i>
+          <span>MANJU UID</span>
+        </span>
+        <div class="absolute inset-0 bg-ff-red translate-y-[101%] group-hover:translate-y-0 transition-transform duration-300"></div>
+      </button>
+      <button type="button" onclick="copyUID('5808306964', 'OLA_AMIT')" class="interactive relative group overflow-hidden px-4 py-2 rounded-full border border-ff-border bg-white/[0.04] text-[11px] font-mono uppercase tracking-widest hover:border-ff-purple transition">
+        <span class="relative z-10 flex items-center gap-1.5 text-zinc-300">
+          <i data-lucide="copy" class="w-3 h-3 text-ff-purple"></i>
+          <span>AMIT UID</span>
+        </span>
+        <div class="absolute inset-0 bg-ff-purple translate-y-[101%] group-hover:translate-y-0 transition-transform duration-300"></div>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Tab Bar -->
+  <div class="md:hidden flex justify-around p-2.5 bg-ff-card border-b border-ff-border relative z-40 text-[11px] font-mono">
+    <button type="button" onclick="openTab('tab-duo')" id="m-btn-tab-duo" class="text-ff-red font-bold">Dynamic Duo</button>
+    <button type="button" onclick="openTab('tab-manju')" id="m-btn-tab-manju" class="text-zinc-400">MANJU</button>
+    <button type="button" onclick="openTab('tab-amit')" id="m-btn-tab-amit" class="text-zinc-400">AMIT</button>
+    <button type="button" onclick="openTab('tab-armory')" id="m-btn-tab-armory" class="text-zinc-400">Arsenal</button>
+  </div>
+
+  <!-- MAIN HUD CONTENT -->
+  <main class="relative z-10 max-w-7xl mx-auto px-6 md:px-14 pt-12 pb-28">
+
+    <!-- ================= PAGE 1: DYNAMIC DUO ================= -->
+    <section id="tab-duo" class="tab-section active-tab">
+      
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-12">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-ff-purple/40 bg-ff-purple/10 text-ff-purple text-xs font-mono mb-3">
+            <i data-lucide="flame" class="w-3.5 h-3.5 fill-ff-purple"></i> LEVEL 1 DYNAMIC DUO PACT • 750 DAYS BOUND
+          </div>
+          <h1 class="text-5xl md:text-8xl font-black font-display tracking-tight uppercase leading-none">
+            DUAL <span class="text-transparent bg-clip-text bg-gradient-to-r from-ff-red via-ff-gold to-ff-purple">BREACH.</span>
+          </h1>
+        </div>
+        <div class="text-left md:text-right font-mono">
+          <span class="text-xs text-zinc-500 uppercase block">Combined Elimination Yield</span>
+          <span class="text-3xl font-display font-black text-ff-gold">1,139 SQUAD ELIMS</span>
+        </div>
+      </div>
+
+      <!-- Side-by-Side Dual Operator Cards -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        
+        <!-- Operator 1: MANJU_-FF -->
+        <div class="holo-card border border-ff-red/40 p-8 rounded-3xl relative overflow-hidden" data-tilt data-tilt-max="5">
+          <div class="flex justify-between items-start pb-6 border-b border-ff-border">
+            <div>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-ff-red/20 text-ff-red border border-ff-red/30">OPERATOR 01</span>
+              <h2 class="text-3xl font-display font-black text-white mt-1">MANJU_-FF</h2>
+              <p class="text-xs font-mono text-zinc-400">UID: 2272023598 • Level 62</p>
+            </div>
+            <div class="text-right">
+              <span class="text-xl font-mono font-bold text-ff-gold flex items-center justify-end gap-1"><i data-lucide="thumbs-up" class="w-4 h-4 fill-ff-gold"></i> 2,407</span>
+              <span class="text-[10px] font-mono text-zinc-500 uppercase">Likes</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3 my-6 text-center font-mono">
+            <div class="bg-black/40 p-3 rounded-xl border border-ff-border">
+              <span class="text-[10px] text-zinc-500 uppercase block">Rank Rating</span>
+              <span class="text-lg font-bold text-ff-red">6,169</span>
+              <span class="text-[9px] text-zinc-400 block">Heroic Emblem</span>
+            </div>
+            <div class="bg-black/40 p-3 rounded-xl border border-ff-border">
+              <span class="text-[10px] text-zinc-500 uppercase block">Main Role</span>
+              <span class="text-lg font-bold text-ff-gold">RUSHER 60%</span>
+              <span class="text-[9px] text-zinc-400 block">Level 8 Mastery</span>
+            </div>
+            <div class="bg-black/40 p-3 rounded-xl border border-ff-border">
+              <span class="text-[10px] text-zinc-500 uppercase block">Title</span>
+              <span class="text-lg font-bold text-ff-purple">#92 SCAR</span>
+              <span class="text-[9px] text-zinc-400 block">Belagavi Sub-div</span>
+            </div>
+          </div>
+
+          <div class="space-y-2 text-xs font-mono border-t border-ff-border pt-4 text-zinc-300">
+            <div class="flex justify-between"><span>Squad Rating:</span><span class="text-ff-gold font-bold">8.2</span></div>
+            <div class="flex justify-between"><span>K/D Ratio:</span><span class="text-white font-bold">3.23 (595 Elims)</span></div>
+            <div class="flex justify-between"><span>Signature SMG:</span><span class="text-ff-red font-bold">MP40 (2,713 Score)</span></div>
+          </div>
+        </div>
+
+        <!-- Operator 2: OLA_AMIT -->
+        <div class="holo-card border border-ff-purple/40 p-8 rounded-3xl relative overflow-hidden" data-tilt data-tilt-max="5">
+          <div class="flex justify-between items-start pb-6 border-b border-ff-border">
+            <div>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-ff-purple/20 text-ff-purple border border-ff-purple/30">OPERATOR 02</span>
+              <h2 class="text-3xl font-display font-black text-white mt-1">OLA_AMIT</h2>
+              <p class="text-xs font-mono text-zinc-400">UID: 5808306964 • Level 58</p>
+            </div>
+            <div class="text-right">
+              <span class="text-xl font-mono font-bold text-ff-gold flex items-center justify-end gap-1"><i data-lucide="thumbs-up" class="w-4 h-4 fill-ff-gold"></i> 2,094</span>
+              <span class="text-[10px] font-mono text-zinc-500 uppercase">Likes</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3 my-6 text-center font-mono">
+            <div class="bg-black/40 p-3 rounded-xl border border-ff-border">
+              <span class="text-[10px] text-zinc-500 uppercase block">CS Stars</span>
+              <span class="text-lg font-bold text-ff-gold">538 Stars</span>
+              <span class="text-[9px] text-zinc-400 block">Heroic Emblem</span>
+            </div>
+            <div class="bg-black/40 p-3 rounded-xl border border-ff-border">
+              <span class="text-[10px] text-zinc-500 uppercase block">Main Role</span>
+              <span class="text-lg font-bold text-ff-purple">RUSHER 73%</span>
+              <span class="text-[9px] text-zinc-400 block">Level 10 Mastery</span>
+            </div>
+            <div class="bg-black/40 p-3 rounded-xl border border-ff-border">
+              <span class="text-[10px] text-zinc-500 uppercase block">Peak Match Dmg</span>
+              <span class="text-lg font-bold text-ff-red">4,868</span>
+              <span class="text-[9px] text-zinc-400 block">BR Record</span>
+            </div>
+          </div>
+
+          <div class="space-y-2 text-xs font-mono border-t border-ff-border pt-4 text-zinc-300">
+            <div class="flex justify-between"><span>Squad Rating:</span><span class="text-ff-gold font-bold">8.4</span></div>
+            <div class="flex justify-between"><span>K/D Ratio:</span><span class="text-white font-bold">3.51 (544 Elims)</span></div>
+            <div class="flex justify-between"><span>Signature SMG:</span><span class="text-ff-purple font-bold">UMP Lv.9 (30.00% Headshot)</span></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Duo Synergy Matrix -->
+      <div class="p-8 rounded-3xl bg-ff-card border border-ff-border font-mono">
+        <h3 class="text-xs uppercase tracking-widest text-zinc-400 mb-6 flex items-center gap-2">
+          <i data-lucide="shield-check" class="w-4 h-4 text-ff-gold"></i> Dynamic Duo Cumulative Telemetry
+        </h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+          <div class="bg-black/40 p-4 rounded-2xl border border-ff-border">
+            <span class="text-xs text-zinc-500 uppercase block">Combined Games</span>
+            <span class="text-3xl font-bold text-white mt-1 block">379</span>
+            <span class="text-[10px] text-zinc-400">40 Total Squad Wins</span>
+          </div>
+          <div class="bg-black/40 p-4 rounded-2xl border border-ff-border">
+            <span class="text-xs text-zinc-500 uppercase block">Close-Range Kills</span>
+            <span class="text-3xl font-bold text-ff-red mt-1 block">521</span>
+            <span class="text-[10px] text-zinc-400">242 Manju + 279 Amit</span>
+          </div>
+          <div class="bg-black/40 p-4 rounded-2xl border border-ff-border">
+            <span class="text-xs text-zinc-500 uppercase block">Combined Knockdowns</span>
+            <span class="text-3xl font-bold text-ff-gold mt-1 block">1,291</span>
+            <span class="text-[10px] text-zinc-400">210 Help-Up Revives</span>
+          </div>
+          <div class="bg-black/40 p-4 rounded-2xl border border-ff-border">
+            <span class="text-xs text-zinc-500 uppercase block">Dual Synergy</span>
+            <span class="text-3xl font-bold text-ff-purple mt-1 block">9.9 / 10</span>
+            <span class="text-[10px] text-zinc-400">Aggressive Dual Entry</span>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ================= PAGE 2: MANJU_-FF ================= -->
+    <section id="tab-manju" class="tab-section">
+      
+      <div class="flex justify-between items-end mb-12">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-ff-gold/30 bg-ff-gold/10 text-ff-gold text-xs font-mono mb-3">
+            <i data-lucide="award" class="w-3.5 h-3.5"></i> REGIONAL #92 SCAR TITLE (BELAGAVI)
+          </div>
+          <h2 class="text-5xl md:text-7xl font-black font-display tracking-tight uppercase leading-none">
+            MANJU <span class="text-transparent bg-clip-text bg-gradient-to-r from-ff-red to-ff-gold">TACTICAL.</span>
+          </h2>
+        </div>
+        <div class="hidden md:block text-right font-mono">
+          <span class="text-xs text-zinc-500 uppercase block">Coin Reserves</span>
+          <span class="text-2xl font-bold text-ff-gold">661,523 GOLD</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- SVG Pentagram Graph -->
+        <div class="lg:col-span-6 bg-ff-card border border-ff-border p-8 rounded-3xl flex flex-col items-center justify-center relative overflow-hidden" data-tilt data-tilt-max="4">
+          <div class="w-full flex justify-between items-center mb-4 font-mono text-xs">
+            <span class="text-zinc-400">MANJU'S COMBAT PENTAGRAM</span>
+            <span class="text-ff-gold">RATING: 8.2 (36G / 30S)</span>
+          </div>
+
+          <div class="relative w-full max-w-[300px] aspect-square flex items-center justify-center my-4">
+            <svg class="w-full h-full transform -rotate-18 drop-shadow-[0_0_15px_rgba(253,184,19,0.2)]" viewBox="0 0 100 100">
+              <polygon points="50,10 90,38 75,82 25,82 10,38" fill="none" stroke="#22222E" stroke-width="1.2"/>
+              <polygon points="50,22 78,41 68,74 32,74 22,41" fill="none" stroke="#22222E" stroke-width="1"/>
+              <line x1="50" y1="50" x2="50" y2="10" stroke="#22222E" stroke-width="1" />
+              <line x1="50" y1="50" x2="90" y2="38" stroke="#22222E" stroke-width="1" />
+              <line x1="50" y1="50" x2="75" y2="82" stroke="#22222E" stroke-width="1" />
+              <line x1="50" y1="50" x2="25" y2="82" stroke="#22222E" stroke-width="1" />
+              <line x1="50" y1="50" x2="10" y2="38" stroke="#22222E" stroke-width="1" />
+              <polygon points="50,15 85,42 70,78 28,76 16,40" fill="rgba(253, 184, 19, 0.28)" stroke="#FDB813" stroke-width="2.2"/>
+            </svg>
+            <span class="absolute -top-1 font-mono text-[10px] text-ff-gold font-bold uppercase">Elims</span>
+            <span class="absolute right-0 top-1/3 font-mono text-[10px] text-zinc-400 uppercase">Win Rate</span>
+            <span class="absolute bottom-2 right-4 font-mono text-[10px] text-zinc-400 uppercase">Tactics</span>
+            <span class="absolute bottom-2 left-4 font-mono text-[10px] text-ff-gold font-bold uppercase">Exploration</span>
+            <span class="absolute left-0 top-1/3 font-mono text-[10px] text-zinc-400 uppercase">Survival</span>
+          </div>
+
+          <span class="text-xs font-mono text-zinc-500 mt-2">208 Matches • 24 Wins • 595 Eliminations</span>
+        </div>
+
+        <!-- Telemetry Breakdown -->
+        <div class="lg:col-span-6 flex flex-col justify-between gap-4 font-mono">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-ff-card border border-ff-border p-5 rounded-2xl">
+              <span class="text-xs text-zinc-500 uppercase block">K/D Ratio</span>
+              <span class="text-3xl font-display font-bold text-ff-red mt-1 block">3.23</span>
+              <span class="text-xs text-zinc-400">595 Eliminations</span>
+            </div>
+            <div class="bg-ff-card border border-ff-border p-5 rounded-2xl">
+              <span class="text-xs text-zinc-500 uppercase block">Avg Damage</span>
+              <span class="text-3xl font-display font-bold text-ff-gold mt-1 block">1,272</span>
+              <span class="text-xs text-zinc-400">11 Max Kill Match</span>
+            </div>
+            <div class="bg-ff-card border border-ff-border p-5 rounded-2xl">
+              <span class="text-xs text-zinc-500 uppercase block">Survival Duration</span>
+              <span class="text-3xl font-display font-bold text-white mt-1 block">09' 21"</span>
+              <span class="text-xs text-zinc-400">4.45 KM Distance</span>
+            </div>
+            <div class="bg-ff-card border border-ff-border p-5 rounded-2xl">
+              <span class="text-xs text-zinc-500 uppercase block">Knockdowns</span>
+              <span class="text-3xl font-display font-bold text-white mt-1 block">674</span>
+              <span class="text-xs text-zinc-400">101 Help-Ups</span>
+            </div>
+          </div>
+
+          <div class="bg-ff-card border border-ff-border p-6 rounded-2xl flex items-center justify-between">
+            <div>
+              <span class="text-xs text-zinc-500 uppercase block">Rusher Specialization</span>
+              <span class="text-lg font-bold text-white">60% Close Range Focus</span>
+              <span class="text-xs text-zinc-400">242 Close Range Eliminations</span>
+            </div>
+            <div class="text-right">
+              <span class="text-3xl font-display font-black text-ff-red">12.10%</span>
+              <span class="text-[10px] text-zinc-500 uppercase block">Headshot Rate</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= PAGE 3: OLA_AMIT ================= -->
+    <section id="tab-amit" class="tab-section">
+      
+      <div class="flex justify-between items-end mb-12">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-ff-purple/30 bg-ff-purple/10 text-ff-purple text-xs font-mono mb-3">
+            <i data-lucide="zap" class="w-3.5 h-3.5"></i> 73% RUSHER LEVEL 10 EXPERT
+          </div>
+          <h2 class="text-5xl md:text-7xl font-black font-display tracking-tight uppercase leading-none">
+            AMIT <span class="text-transparent bg-clip-text bg-gradient-to-r from-ff-purple to-ff-cyan">BREACHER.</span>
+          </h2>
+        </div>
+        <div class="hidden md:block text-right font-mono">
+          <span class="text-xs text-zinc-500 uppercase block">Peak Match Output</span>
+          <span class="text-2xl font-bold text-ff-red">4,868 DAMAGE</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Amit SVG Pentagram -->
+        <div class="lg:col-span-6 bg-ff-card border border-ff-border p-8 rounded-3xl flex flex-col items-center justify-center relative overflow-hidden" data-tilt data-tilt-max="4">
+          <div class="w-full flex justify-between items-center mb-4 font-mono text-xs">
+            <span class="text-zinc-400">AMIT'S COMBAT PENTAGRAM</span>
+            <span class="text-ff-purple font-bold">RATING: 8.4 (32G / 28S)</span>
+          </div>
+
+          <div class="relative w-full max-w-[300px] aspect-square flex items-center justify-center my-4">
+            <svg class="w-full h-full transform -rotate-18 drop-shadow-[0_0_15px_rgba(168,85,247,0.25)]" viewBox="0 0 100 100">
+              <polygon points="50,10 90,38 75,82 25,82 10,38" fill="none" stroke="#22222E" stroke-width="1.2"/>
+              <polygon points="50,22 78,41 68,74 32,74 22,41" fill="none" stroke="#22222E" stroke-width="1"/>
+              <line x1="50" y1="50" x2="50" y2="10" stroke="#22222E" stroke-width="1" />
+              <line x1="50" y1="50" x2="90" y2="38" stroke="#22222E" stroke-width="1" />
+              <line x1="50" y1="50" x2="75" y2="82" stroke="#22222E" stroke-width="1" />
+              <line x1="50" y1="50" x2="25" y2="82" stroke="#22222E" stroke-width="1" />
+              <line x1="50" y1="50" x2="10" y2="38" stroke="#22222E" stroke-width="1" />
+              <polygon points="50,12 88,40 73,80 30,74 18,38" fill="rgba(168, 85, 247, 0.28)" stroke="#A855F7" stroke-width="2.2"/>
+            </svg>
+            <span class="absolute -top-1 font-mono text-[10px] text-ff-purple font-bold uppercase">Elims</span>
+            <span class="absolute right-0 top-1/3 font-mono text-[10px] text-zinc-400 uppercase">Win Rate</span>
+            <span class="absolute bottom-2 right-4 font-mono text-[10px] text-zinc-400 uppercase">Tactics</span>
+            <span class="absolute bottom-2 left-4 font-mono text-[10px] text-zinc-400 uppercase">Exploration</span>
+            <span class="absolute left-0 top-1/3 font-mono text-[10px] text-zinc-400 uppercase">Survival</span>
+          </div>
+
+          <span class="text-xs font-mono text-zinc-500 mt-2">171 Matches • 16 Wins • 544 Eliminations</span>
+        </div>
+
+        <!-- Amit Telemetry Breakdown -->
+        <div class="lg:col-span-6 flex flex-col justify-between gap-4 font-mono">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-ff-card border border-ff-border p-5 rounded-2xl">
+              <span class="text-xs text-zinc-500 uppercase block">K/D Ratio</span>
+              <span class="text-3xl font-display font-bold text-ff-purple mt-1 block">3.51</span>
+              <span class="text-xs text-zinc-400">544 Eliminations</span>
+            </div>
+            <div class="bg-ff-card border border-ff-border p-5 rounded-2xl">
+              <span class="text-xs text-zinc-500 uppercase block">Avg Damage / Match</span>
+              <span class="text-3xl font-display font-bold text-ff-gold mt-1 block">1,424</span>
+              <span class="text-xs text-zinc-400">13 Max Kill Match</span>
+            </div>
+            <div class="bg-ff-card border border-ff-border p-5 rounded-2xl">
+              <span class="text-xs text-zinc-500 uppercase block">Survival Duration</span>
+              <span class="text-3xl font-display font-bold text-white mt-1 block">09' 06"</span>
+              <span class="text-xs text-zinc-400">4.59 KM Distance</span>
+            </div>
+            <div class="bg-ff-card border border-ff-border p-5 rounded-2xl">
+              <span class="text-xs text-zinc-500 uppercase block">Knockdowns</span>
+              <span class="text-3xl font-display font-bold text-white mt-1 block">617</span>
+              <span class="text-xs text-zinc-400">109 Help-Ups</span>
+            </div>
+          </div>
+
+          <div class="bg-ff-card border border-ff-border p-6 rounded-2xl flex items-center justify-between">
+            <div>
+              <span class="text-xs text-zinc-500 uppercase block">Rusher Specialization</span>
+              <span class="text-lg font-bold text-white">73% Close Range Focus</span>
+              <span class="text-xs text-zinc-400">279 Close Range Elims (MAC10)</span>
+            </div>
+            <div class="text-right">
+              <span class="text-3xl font-display font-black text-ff-purple">15.99%</span>
+              <span class="text-[10px] text-zinc-500 uppercase block">Headshot Rate (87 HS)</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= PAGE 4: ARSENAL COMPARISON ================= -->
+    <section id="tab-armory" class="tab-section">
+      
+      <div class="mb-12">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-ff-gold/30 bg-ff-gold/10 text-ff-gold text-xs font-mono mb-3">
+          <i data-lucide="swords" class="w-3.5 h-3.5"></i> SYNDICATE WEAPONS VAULT
+        </div>
+        <h2 class="text-5xl md:text-7xl font-black font-display tracking-tight uppercase leading-none">
+          WEAPON <span class="text-transparent bg-clip-text bg-gradient-to-r from-ff-red via-ff-gold to-ff-purple">MASTERY.</span>
+        </h2>
+      </div>
+
+      <!-- MANJU'S SIGNATURE ARSENAL -->
+      <div class="mb-14">
+        <div class="flex items-center gap-3 mb-6">
+          <span class="w-3 h-3 rounded-full bg-ff-red"></span>
+          <h3 class="text-xl font-display font-black uppercase text-white">MANJU_-FF // Primary Loadout</h3>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono">
+          <div class="bg-ff-card border-2 border-ff-gold/60 p-6 rounded-2xl holo-card" data-tilt data-tilt-max="6">
+            <div class="flex justify-between text-xs text-zinc-500"><span>ASSAULT RIFLE</span><span class="text-ff-gold font-bold">#92 BELAGAVI</span></div>
+            <h4 class="text-3xl font-display font-black text-white mt-2">SCAR</h4>
+            <div class="mt-4 space-y-1.5 text-xs text-zinc-400">
+              <div class="flex justify-between"><span>Highest Score:</span><span class="text-white font-bold">5,394</span></div>
+              <div class="flex justify-between"><span>Headshot Rate:</span><span class="text-ff-red font-bold">12.03%</span></div>
+              <div class="flex justify-between"><span>Eliminations:</span><span class="text-white font-bold">133</span></div>
+            </div>
+          </div>
+
+          <div class="bg-ff-card border-2 border-ff-red/60 p-6 rounded-2xl holo-card" data-tilt data-tilt-max="6">
+            <div class="flex justify-between text-xs text-zinc-500"><span>SMG RUSHER</span><span class="text-ff-red font-bold">LV. 8 MASTERY</span></div>
+            <h4 class="text-3xl font-display font-black text-white mt-2">MP40</h4>
+            <div class="mt-4 space-y-1.5 text-xs text-zinc-400">
+              <div class="flex justify-between"><span>Highest Score:</span><span class="text-white font-bold">2,713</span></div>
+              <div class="flex justify-between"><span>Headshot Rate:</span><span class="text-ff-red font-bold">14.93%</span></div>
+              <div class="flex justify-between"><span>Eliminations:</span><span class="text-white font-bold">67</span></div>
+            </div>
+          </div>
+
+          <div class="bg-ff-card border border-ff-border p-6 rounded-2xl holo-card" data-tilt data-tilt-max="6">
+            <div class="flex justify-between text-xs text-zinc-500"><span>SMG SECONDARY</span><span class="text-ff-purple font-bold">LV. 5 MASTERY</span></div>
+            <h4 class="text-3xl font-display font-black text-white mt-2">MP5</h4>
+            <div class="mt-4 space-y-1.5 text-xs text-zinc-400">
+              <div class="flex justify-between"><span>Highest Score:</span><span class="text-white font-bold">2,189</span></div>
+              <div class="flex justify-between"><span>Headshot Rate:</span><span class="text-ff-purple font-bold">17.02%</span></div>
+              <div class="flex justify-between"><span>Eliminations:</span><span class="text-white font-bold">47</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AMIT'S SIGNATURE ARSENAL -->
+      <div>
+        <div class="flex items-center gap-3 mb-6">
+          <span class="w-3 h-3 rounded-full bg-ff-purple"></span>
+          <h3 class="text-xl font-display font-black uppercase text-white">OLA_AMIT // Primary Loadout</h3>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono">
+          <div class="bg-ff-card border-2 border-ff-purple/60 p-6 rounded-2xl holo-card" data-tilt data-tilt-max="6">
+            <div class="flex justify-between text-xs text-zinc-500"><span>SMG DEADLY</span><span class="text-ff-purple font-bold">LV. 9 MASTERY</span></div>
+            <h4 class="text-3xl font-display font-black text-white mt-2">UMP</h4>
+            <div class="mt-4 space-y-1.5 text-xs text-zinc-400">
+              <div class="flex justify-between"><span>Highest Score:</span><span class="text-white font-bold">1,883</span></div>
+              <div class="flex justify-between"><span>Headshot Rate:</span><span class="text-ff-gold font-bold">30.00%</span></div>
+              <div class="flex justify-between"><span>Eliminations:</span><span class="text-white font-bold">50</span></div>
+            </div>
+          </div>
+
+          <div class="bg-ff-card border border-ff-border p-6 rounded-2xl holo-card" data-tilt data-tilt-max="6">
+            <div class="flex justify-between text-xs text-zinc-500"><span>SMG RUSHER</span><span class="text-ff-cyan font-bold">ADVANCED</span></div>
+            <h4 class="text-3xl font-display font-black text-white mt-2">MAC10</h4>
+            <div class="mt-4 space-y-1.5 text-xs text-zinc-400">
+              <div class="flex justify-between"><span>Highest Score:</span><span class="text-white font-bold">1,738</span></div>
+              <div class="flex justify-between"><span>Headshot Rate:</span><span class="text-white font-bold">14.29%</span></div>
+              <div class="flex justify-between"><span>Eliminations:</span><span class="text-white font-bold">63</span></div>
+            </div>
+          </div>
+
+          <div class="bg-ff-card border border-ff-border p-6 rounded-2xl holo-card" data-tilt data-tilt-max="6">
+            <div class="flex justify-between text-xs text-zinc-500"><span>SMG SECONDARY</span><span class="text-ff-gold font-bold">LV. 5 MASTERY</span></div>
+            <h4 class="text-3xl font-display font-black text-white mt-2">MP40</h4>
+            <div class="mt-4 space-y-1.5 text-xs text-zinc-400">
+              <div class="flex justify-between"><span>Highest Score:</span><span class="text-white font-bold">1,057</span></div>
+              <div class="flex justify-between"><span>Headshot Rate:</span><span class="text-white font-bold">9.38%</span></div>
+              <div class="flex justify-between"><span>Eliminations:</span><span class="text-white font-bold">32</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Interactive Toast Notification -->
+  <div id="toast" style="transform: translate(-50%, 6rem); opacity: 0;" class="fixed bottom-8 left-1/2 bg-ff-red text-black font-mono text-xs font-bold px-6 py-3 rounded-full shadow-2xl transition-all duration-300 pointer-events-none z-50 flex items-center gap-2">
+    <i data-lucide="check-circle" class="w-4 h-4 text-black"></i>
+    <span id="toast-text">UID COPIED TO CLIPBOARD</span>
+  </div>
+
+  <!-- JAVASCRIPT INITIALIZERS (Runs without blocking tab clicks) -->
+  <script>
+    try {
+      lucide.createIcons();
+    } catch(e) {}
+
+    try {
+      VanillaTilt.init(document.querySelectorAll("[data-tilt]"));
+    } catch(e) {}
+
+    // Cursor Follower Logic
+    var cursorDot = document.getElementById("cursor-dot");
+    var cursorOutline = document.getElementById("cursor-outline");
+    var mX = window.innerWidth / 2;
+    var mY = window.innerHeight / 2;
+    var oX = mX;
+    var oY = mY;
+
+    window.addEventListener("mousemove", function(e) {
+      mX = e.clientX;
+      mY = e.clientY;
+      if (cursorDot) {
+        cursorDot.style.transform = "translate3d(" + mX + "px, " + mY + "px, 0) translate(-50%, -50%)";
+      }
+    });
+
+    function loopCursor() {
+      oX += (mX - oX) * 0.15;
+      oY += (mY - oY) * 0.15;
+      if (cursorOutline) {
+        cursorOutline.style.transform = "translate3d(" + oX + "px, " + oY + "px, 0) translate(-50%, -50%)";
+      }
+      requestAnimationFrame(loopCursor);
+    }
+    loopCursor();
+
+    window.addEventListener("click", function(e) {
+      var ripple = document.createElement("div");
+      ripple.className = "click-ripple";
+      ripple.style.left = e.clientX + "px";
+      ripple.style.top = e.clientY + "px";
+      ripple.style.width = "24px";
+      ripple.style.height = "24px";
+      document.body.appendChild(ripple);
+      setTimeout(function() {
+        if (ripple.parentNode) ripple.parentNode.removeChild(ripple);
+      }, 500);
+    });
+
+    // 3D Canvas Background
+    try {
+      var canvas = document.getElementById('three-canvas');
+      if (canvas && typeof THREE !== 'undefined') {
+        var scene = new THREE.Scene();
+        var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        var renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        var geo1 = new THREE.IcosahedronGeometry(2.6, 1);
+        var mat1 = new THREE.MeshBasicMaterial({ color: 0xFF2E55, wireframe: true, transparent: true, opacity: 0.18 });
+        var mesh1 = new THREE.Mesh(geo1, mat1);
+        mesh1.position.x = -1.6;
+        scene.add(mesh1);
+
+        var geo2 = new THREE.OctahedronGeometry(2.2, 1);
+        var mat2 = new THREE.MeshBasicMaterial({ color: 0xA855F7, wireframe: true, transparent: true, opacity: 0.22 });
+        var mesh2 = new THREE.Mesh(geo2, mat2);
+        mesh2.position.x = 1.6;
+        scene.add(mesh2);
+
+        var particleCount = 150;
+        var particleGeo = new THREE.BufferGeometry();
+        var particleCoords = new Float32Array(particleCount * 3);
+
+        for (var p = 0; p < particleCount * 3; p += 3) {
+          particleCoords[p] = (Math.random() - 0.5) * 20;
+          particleCoords[p + 1] = (Math.random() - 0.5) * 20;
+          particleCoords[p + 2] = (Math.random() - 0.5) * 10;
+        }
+        particleGeo.setAttribute('position', new THREE.BufferAttribute(particleCoords, 3));
+
+        var particleMat = new THREE.PointsMaterial({
+          color: 0xFDB813,
+          size: 0.04,
+          transparent: true,
+          opacity: 0.6
+        });
+        var particles = new THREE.Points(particleGeo, particleMat);
+        scene.add(particles);
+
+        camera.position.z = 5;
+
+        function render3D() {
+          requestAnimationFrame(render3D);
+          mesh1.rotation.x += 0.003;
+          mesh1.rotation.y += 0.004;
+          mesh2.rotation.x -= 0.003;
+          mesh2.rotation.y -= 0.004;
+
+          var arr = particleGeo.attributes.position.array;
+          for (var k = 1; k < particleCount * 3; k += 3) {
+            arr[k] += 0.01;
+            if (arr[k] > 10) arr[k] = -10;
+          }
+          particleGeo.attributes.position.needsUpdate = true;
+          renderer.render(scene, camera);
+        }
+        render3D();
+
+        window.addEventListener('resize', function() {
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+      }
+    } catch(err) {}
+  </script>
+</body>
+</html>
